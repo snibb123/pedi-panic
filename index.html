@@ -118,10 +118,11 @@
     top: 14px; left: 0; right: 0;
     text-align: center;
     color: #fff;
-    font-size: clamp(13px,2vw,17px);
+    font-size: clamp(20px, 3.4vw, 32px);
+    font-weight: bold;
     z-index: 4;
     pointer-events: none;
-    text-shadow: 1px 1px 0 #c2418a, -1px -1px 0 #c2418a;
+    text-shadow: 2px 2px 0 #c2418a, -2px -2px 0 #c2418a, 2px -2px 0 #c2418a, -2px 2px 0 #c2418a;
   }
 
   /* gentle cloud drift (CSS so the page can reach idle) */
@@ -450,7 +451,7 @@
   </svg>
 </div>
 
-<div class="instructions">✨ Brush back &amp; forth to fill in each toenail ✨</div>
+<div class="instructions">✨ Brush back &amp; forth to fully fill each toenail ✨</div>
 
 <!-- Nail-polish brush cursor: the bristle tip (lower-left, ~30,84) sits at the pointer -->
 <svg id="wand" viewBox="0 0 110 110">
@@ -524,7 +525,8 @@
   const fill = new Array(toes.length).fill(0);
   const polishEls = [];
   let nailRects = [];                       // cached screen rects for hit-testing
-  const FILL_STEP = 0.06;                   // added per brush move over a nail
+  const FILL_STEP = 0.085;                  // added per brush move over a nail
+  const DONE = 0.8;                         // a toenail counts as finished here (forgiving)
 
   toes.forEach((toe, idx) => {
     const nail = toe.querySelector('.toenail');
@@ -545,7 +547,7 @@
   window.addEventListener('resize', () => { if (gameStarted) cacheRects(); });
 
   function renderFill(i){
-    polishEls[i].style.opacity = fill[i] <= 0 ? 0 : (0.30 + 0.70 * fill[i]);
+    polishEls[i].style.opacity = fill[i] <= 0 ? 0 : Math.min(1, 0.20 + 0.80 * fill[i]);
   }
   function brushAt(x, y){
     if (!gameStarted) return;
@@ -558,7 +560,7 @@
         renderFill(i);
         wand.classList.add('zap');
         clearTimeout(wand._zt); wand._zt = setTimeout(() => wand.classList.remove('zap'), 90);
-        if (fill[i] >= 1) completeToe(i);
+        if (fill[i] >= DONE) completeToe(i);
         return;                              // one nail per move
       }
     }
@@ -566,6 +568,7 @@
   function completeToe(i){
     if (painted.has(i)) return;
     painted.add(i);
+    fill[i] = 1; renderFill(i);              // snap to a full, glossy coat
     const r = nailRects[i] || toes[i].querySelector('.toenail').getBoundingClientRect();
     const cx = r.left + r.width/2, cy = r.top + r.height/2;
     sparkle(cx, cy);

@@ -525,8 +525,8 @@
   const fill = new Array(toes.length).fill(0);
   const polishEls = [];
   let nailRects = [];                       // cached screen rects for hit-testing
-  const FILL_STEP = 0.085;                  // added per brush move over a nail
-  const DONE = 0.8;                         // a toenail counts as finished here (forgiving)
+  const FILL_STEP = 0.09;                   // added per brush move over a nail
+  const DONE = 0.6;                         // a toenail counts as finished here (forgiving)
 
   toes.forEach((toe, idx) => {
     const nail = toe.querySelector('.toenail');
@@ -547,7 +547,8 @@
   window.addEventListener('resize', () => { if (gameStarted) cacheRects(); });
 
   function renderFill(i){
-    polishEls[i].style.opacity = fill[i] <= 0 ? 0 : Math.min(1, 0.20 + 0.80 * fill[i]);
+    // polish reaches a "full" look right as the toe completes (so what you see == what counts)
+    polishEls[i].style.opacity = fill[i] <= 0 ? 0 : Math.min(1, 0.30 + 0.70 * (fill[i] / 0.7));
   }
   function brushAt(x, y){
     if (!gameStarted) return;
@@ -687,14 +688,14 @@
     waterRAF = requestAnimationFrame(waterTick);
   }
   function splashWater(x, y){
-    for (let i = 0; i < 6; i++){
+    for (let i = 0; i < 10; i++){
       const s = document.createElement('div');
       s.className = 'splash-bit';
       s.style.left = x + 'px'; s.style.top = y + 'px';
-      s.style.setProperty('--dx', (Math.random()*80 - 40) + 'px');
-      s.style.setProperty('--dy', (Math.random()*-55 - 8) + 'px');
+      s.style.setProperty('--dx', (Math.random()*110 - 55) + 'px');
+      s.style.setProperty('--dy', (Math.random()*-70 - 10) + 'px');
       document.body.appendChild(s);
-      setTimeout(() => s.remove(), 520);
+      setTimeout(() => s.remove(), 560);
     }
   }
   function washToe(toe){

@@ -700,9 +700,10 @@
   }
   function washToe(toe){
     const idx = +toe.dataset.word;
-    if (fill[idx] <= 0 || fill[idx] >= 1) return;   // bare, or finished & "dry" → just a splash
-    fill[idx] = 0;                                   // wash off only half-done polish
+    if (fill[idx] <= 0) return;             // bare toe → just a harmless splash
+    fill[idx] = 0;                          // a splash washes the polish right off — finished or not
     renderFill(idx);
+    painted.delete(idx);                    // no longer counts as done
   }
   function startWater(){
     stopWater();

@@ -1,8 +1,8 @@
-# Mani-Magic 💅 — A Happy Mother's Day Card
+# Pedi Panic 💅 — A Happy Mother's Day Card
 
-An animated, interactive Mother's Day card for Mama. Start the **Mani-Magic** title screen,
-grab the magic wand, and paint all ten toes before the countdown runs out to reveal the
-surprise. 🌷
+An animated, interactive Mother's Day card for Mama. Start the **Pedi Panic** title screen,
+grab the magic wand, and paint all ten toes before the countdown runs out — while dodging
+splashes of water that wash the polish off — to reveal the surprise. 🌷💦
 
 Made with love by Jordan & Jenna. ❤️
 

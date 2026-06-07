@@ -159,6 +159,24 @@
     100% { opacity: 0; transform: translate(-50%,-185%) scale(1); }
   }
 
+  /* falling water drops (wash the polish off if you're too slow) */
+  .water-drop {
+    position: fixed; z-index: 7; width: 18px; height: 24px;
+    margin-left: -9px; margin-top: -12px; pointer-events: none;
+    background: radial-gradient(circle at 35% 28%, #d6f3ff, #69c3ff 62%, #2f9fe6);
+    border-radius: 50% 50% 50% 50% / 66% 66% 34% 34%;
+    box-shadow: 0 0 7px rgba(90,185,255,0.6);
+  }
+  .splash-bit {
+    position: fixed; z-index: 7; width: 7px; height: 7px; border-radius: 50%;
+    background: #8fd8ff; pointer-events: none; transform: translate(-50%,-50%);
+    animation: splashOut .5s ease-out forwards;
+  }
+  @keyframes splashOut {
+    0%   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.4); }
+  }
+
   /* ===== blur the scene & swap cursor while an overlay is up ===== */
   body.title-up .stage { filter: blur(7px) brightness(0.95) saturate(1.1); }
   body.overlay-active { cursor: auto; }
@@ -486,7 +504,7 @@
     <div class="mani-sub">✨ welcome to ✨</div>
     <div class="mani-title">Mani<br>Magic</div>
     <div class="mani-flowers">🌸 💅 🌷 💖 🌼</div>
-    <div class="mani-rules">Grab the magic wand and paint all ten toes before the timer runs out!</div>
+    <div class="mani-rules">Grab the magic wand and paint all ten toes before the timer runs out — but watch out for splashes that wash the polish off! 💦</div>
     <button class="start-btn" id="startBtn">START ▶</button>
   </div>
 </div>
@@ -550,7 +568,7 @@
     wand.classList.add('zap');
     setTimeout(()=> wand.classList.remove('zap'), 120);
 
-    if (painted.size === toes.length) { stopTimer(); setTimeout(win, 700); }
+    if (painted.size === toes.length) { gameStarted = false; stopTimer(); stopWater(); setTimeout(win, 700); }
   }
 
   // paint only when the nail itself is clicked / tapped
@@ -587,6 +605,76 @@
     if (timeLeft <= 0){ stopTimer(); loseRound(); }
   }
 
+  // ===== falling water: washes the polish off painted toes if you dawdle =====
+  const NAIL_BASE = '#ffe8db';
+  let waterRAF = null, dropTimer = null, drops = [];
+
+  function nailScreenPos(toe){
+    const r = toe.querySelector('.toenail').getBoundingClientRect();
+    return { x: r.left + r.width/2, y: r.top + r.height/2 };
+  }
+  function spawnDrop(){
+    if (!gameStarted) return;
+    const toe = toes[Math.floor(Math.random()*toes.length)];   // a random toe "lane"
+    const p = nailScreenPos(toe);
+    const el = document.createElement('div');
+    el.className = 'water-drop';
+    el.style.left = p.x + 'px';
+    el.style.top  = '-20px';
+    document.body.appendChild(el);
+    drops.push({ el, x: p.x, y: -20, vy: 3.2 + Math.random()*1.7, toe, targetY: p.y });
+  }
+  function scheduleDrop(){
+    if (!gameStarted) return;
+    spawnDrop();
+    dropTimer = setTimeout(scheduleDrop, 950 + Math.random()*1200);   // staggered
+  }
+  function waterTick(){
+    if (!gameStarted){ waterRAF = null; return; }
+    for (let i = drops.length - 1; i >= 0; i--){
+      const d = drops[i];
+      d.y += d.vy;
+      d.el.style.top = d.y + 'px';
+      if (d.y >= d.targetY){
+        splashWater(d.x, d.targetY);
+        washToe(d.toe);
+        d.el.remove(); drops.splice(i, 1);
+      } else if (d.y > window.innerHeight + 40){
+        d.el.remove(); drops.splice(i, 1);
+      }
+    }
+    waterRAF = requestAnimationFrame(waterTick);
+  }
+  function splashWater(x, y){
+    for (let i = 0; i < 6; i++){
+      const s = document.createElement('div');
+      s.className = 'splash-bit';
+      s.style.left = x + 'px'; s.style.top = y + 'px';
+      s.style.setProperty('--dx', (Math.random()*80 - 40) + 'px');
+      s.style.setProperty('--dy', (Math.random()*-55 - 8) + 'px');
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 520);
+    }
+  }
+  function washToe(toe){
+    const idx = +toe.dataset.word;
+    if (!painted.has(idx)) return;          // unpainted toe → just a harmless splash
+    painted.delete(idx);
+    toe.querySelector('.toenail').setAttribute('fill', NAIL_BASE);
+  }
+  function startWater(){
+    stopWater();
+    scheduleDrop();
+    waterRAF = requestAnimationFrame(waterTick);
+  }
+  function stopWater(){
+    clearTimeout(dropTimer);
+    if (waterRAF) cancelAnimationFrame(waterRAF);
+    waterRAF = null;
+    drops.forEach(d => d.el.remove());
+    drops = [];
+  }
+
   function resetRound(){
     painted.clear();
     toes.forEach(t => t.querySelector('.toenail').setAttribute('fill', '#ffe8db'));
@@ -595,7 +683,7 @@
   }
 
   function showTitle(){
-    gameStarted = false; stopTimer();
+    gameStarted = false; stopTimer(); stopWater();
     resetRound();
     timerEl.classList.add('hidden');
     document.body.classList.add('title-up'); setOverlay(true);
@@ -609,6 +697,7 @@
     resetRound();
     gameStarted = true;
     startTimer();
+    startWater();
   }
 
   function win(){
@@ -620,7 +709,7 @@
   }
 
   function loseRound(){
-    gameStarted = false;
+    gameStarted = false; stopWater();
     timerEl.classList.add('hidden');
     setOverlay(true);
     timesup.classList.add('show');

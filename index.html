@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Mother's Day 💖</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+    cursor: none;
+    background: #6ec6ff;
+    user-select: none;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* full-bleed scene */
+  svg.scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .title-wrap {
+    position: relative;
+    z-index: 3;
+    margin-top: 16px;
+    text-align: center;
+    pointer-events: none;
+  }
+  .title {
+    font-size: clamp(22px, 4.2vw, 44px);
+    color: #fff;
+    text-shadow: -2px -2px 0 #e23b8a, 2px -2px 0 #e23b8a, -2px 2px 0 #e23b8a,
+                 2px 2px 0 #e23b8a, 4px 5px 0 rgba(0,0,0,0.12);
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    margin-top: 6px;
+    font-size: clamp(13px, 2vw, 18px);
+    color: #fff;
+    text-shadow: 1px 1px 0 #3aa0e0, -1px -1px 0 #3aa0e0;
+  }
+
+  .toe { cursor: none; }
+  .toenail { transition: fill .35s ease; }
+  .toe-glow { transition: filter .25s ease; }
+
+  /* magic wand cursor */
+  #wand {
+    position: fixed;
+    width: 104px;
+    height: 104px;
+    pointer-events: none;
+    z-index: 999;
+    transform: translate(-38px, -38px);
+    transition: transform .08s ease-out;
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,0.25));
+  }
+  #wand.zap { transform: translate(-38px, -38px) scale(1.18); }
+
+  #finale {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .8s ease, background .8s ease;
+    z-index: 500;
+    text-align: center;
+    padding: 20px;
+  }
+  #finale.show { opacity: 1; background: rgba(110, 198, 255, 0.55); }
+  #finale h1 {
+    font-size: clamp(34px, 7vw, 82px);
+    color: #fff;
+    text-shadow: -3px -3px 0 #e23b8a, 3px -3px 0 #e23b8a, -3px 3px 0 #e23b8a,
+                 3px 3px 0 #e23b8a, 6px 7px 0 rgba(0,0,0,0.15);
+    animation: pop .6s ease;
+  }
+  #finale .pedi {
+    margin-top: 18px;
+    font-size: clamp(18px, 3.5vw, 30px);
+    color: #6c3fd6;
+    background: #fff;
+    padding: 18px 30px;
+    border-radius: 40px;
+    border: 5px solid #ffd166;
+    box-shadow: 0 10px 0 rgba(0,0,0,0.12);
+    max-width: 640px;
+  }
+  #finale .hint { margin-top: 22px; font-size: 15px; color: #fff;
+    text-shadow: 1px 1px 0 #c2418a; }
+  @keyframes pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .instructions {
+    position: fixed;
+    top: 14px; left: 0; right: 0;
+    text-align: center;
+    color: #fff;
+    font-size: clamp(13px,2vw,17px);
+    z-index: 4;
+    pointer-events: none;
+    text-shadow: 1px 1px 0 #c2418a, -1px -1px 0 #c2418a;
+  }
+
+  /* gentle cloud drift (CSS so the page can reach idle) */
+  .cloud-drift { animation: drift 9s ease-in-out infinite alternate; }
+  .cloud-drift.slow { animation-duration: 12s; }
+  @keyframes drift {
+    from { transform: translateX(-18px); }
+    to   { transform: translateX(18px); }
+  }
+
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    font-size: 13px;
+    z-index: 998;
+    animation: sparkleOut .7s ease-out forwards;
+  }
+  @keyframes sparkleOut {
+    0% { opacity: 1; transform: translate(0,0) scale(0.4) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.3) rotate(140deg); }
+  }
+
+  /* running tally that pops up by the toe you just painted */
+  .count-pop {
+    position: fixed; z-index: 998; pointer-events: none;
+    font-family: 'Comic Sans MS', cursive; font-weight: 900;
+    font-size: clamp(28px, 5vw, 42px); color: #fff;
+    -webkit-text-stroke: 2px #c92e8e;
+    text-shadow: 0 3px 0 rgba(201,46,142,0.6);
+    transform: translate(-50%,-50%);
+    animation: countPop 0.9s ease-out forwards;
+  }
+  @keyframes countPop {
+    0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.3); }
+    25%  { opacity: 1; transform: translate(-50%,-95%) scale(1.25); }
+    100% { opacity: 0; transform: translate(-50%,-185%) scale(1); }
+  }
+
+  /* ===== blur the scene & swap cursor while an overlay is up ===== */
+  body.title-up .stage { filter: blur(7px) brightness(0.95) saturate(1.1); }
+  body.overlay-active { cursor: auto; }
+  body.overlay-active #wand { display: none; }
+
+  /* ===== MANI-MAGIC title screen (Barbie-game vibe, slides from the side) ===== */
+  #titleScreen {
+    position: fixed; inset: 0; z-index: 800;
+    display: flex; align-items: center; justify-content: center;
+    transform: translateX(112%);
+    transition: transform .65s cubic-bezier(.2,.85,.35,1.12);
+  }
+  #titleScreen.shown { transform: translateX(0); }
+  .title-card {
+    position: relative;
+    width: min(90vw, 560px);
+    padding: 36px 30px 34px;
+    text-align: center;
+    border-radius: 34px;
+    background: linear-gradient(165deg, #eafaff 0%, #fff4fb 45%, #ffe1ef 100%);
+    border: 7px solid #fff;
+    box-shadow: 0 12px 0 rgba(199,127,77,0.28), 0 24px 46px rgba(0,0,0,0.20),
+                inset 0 0 0 4px #ffd0e6;
+    overflow: hidden;
+  }
+  .title-card::before { /* soft sheen */
+    content: ""; position: absolute; top: -40%; left: -20%;
+    width: 140%; height: 70%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0));
+    transform: rotate(-8deg); pointer-events: none; border-radius: 50%;
+  }
+  /* match the scene's title style: white fill + pink outline */
+  .mani-title {
+    font-size: clamp(40px, 9vw, 78px);
+    font-weight: 900; line-height: 0.95; letter-spacing: 1px;
+    color: #fff;
+    text-shadow: -2px -2px 0 #e23b8a, 2px -2px 0 #e23b8a, -2px 2px 0 #e23b8a,
+                 2px 2px 0 #e23b8a, 4px 6px 0 rgba(0,0,0,0.12);
+    margin: 4px 0 2px;
+  }
+  .mani-sub {
+    font-size: clamp(14px, 2.6vw, 20px); color: #fff; font-weight: bold;
+    text-shadow: 1px 1px 0 #e07bb0, -1px -1px 0 #e07bb0; margin-bottom: 6px;
+  }
+  .mani-flowers { font-size: clamp(22px, 5vw, 34px); margin: 6px 0 14px; letter-spacing: 4px; }
+  .mani-rules {
+    font-size: clamp(12px,2.2vw,15px); color: #a85285; background: rgba(255,255,255,0.72);
+    border-radius: 16px; padding: 8px 12px; margin: 0 auto 18px; max-width: 380px;
+  }
+  .start-btn {
+    font-family: inherit; font-size: clamp(20px, 4vw, 30px); font-weight: 900;
+    color: #fff; cursor: pointer; border: 4px solid #fff;
+    background: linear-gradient(180deg, #ffa6d6, #ff79bd);
+    padding: 12px 44px; border-radius: 40px;
+    box-shadow: 0 8px 0 #e06aa3, 0 12px 18px rgba(0,0,0,0.20);
+    letter-spacing: 1px; transition: transform .08s, box-shadow .08s;
+    text-shadow: 1px 1px 0 #d6457f;
+  }
+  .start-btn:hover { transform: translateY(-2px); }
+  .start-btn:active { transform: translateY(5px); box-shadow: 0 3px 0 #e06aa3, 0 5px 10px rgba(0,0,0,0.22); }
+  /* floating deco flowers on the title screen */
+  .deco { position: absolute; font-size: 30px; pointer-events: none; animation: bob 3s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{ transform: translateY(0) rotate(-6deg);} 50%{ transform: translateY(-10px) rotate(8deg);} }
+
+  /* ===== digital countdown ===== */
+  #timer {
+    position: fixed; top: 12px; right: 18px; z-index: 6;
+    font-family: 'Courier New', monospace; font-weight: bold;
+    font-size: clamp(20px, 3vw, 30px);
+    color: #fff; background: rgba(201,46,142,0.85);
+    padding: 6px 16px; border-radius: 14px; border: 3px solid #fff;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.18); letter-spacing: 2px;
+    text-shadow: 0 0 8px #ff9ad4;
+  }
+  #timer.hidden { display: none; }
+  #timer.low { color: #fff; background: #e8243f; animation: pulse .5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.12);} }
+
+  /* ===== time's up overlay ===== */
+  #timesup {
+    position: fixed; inset: 0; z-index: 500;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    text-align: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity .5s ease;
+    background: rgba(120, 60, 90, 0.0);
+  }
+  #timesup.show { opacity: 1; pointer-events: auto; background: rgba(120, 60, 90, 0.45); }
+  #timesup h1 {
+    font-size: clamp(34px,7vw,72px); color: #fff;
+    text-shadow: -3px -3px 0 #c92e8e,3px -3px 0 #c92e8e,-3px 3px 0 #c92e8e,3px 3px 0 #c92e8e;
+  }
+  #timesup p { color:#fff; font-size: clamp(15px,3vw,22px); margin-top:10px;
+    text-shadow:1px 1px 0 #c2418a; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="title-wrap"></div>
+
+  <svg class="scene" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <!-- sky gradient -->
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#79cdff"/>
+        <stop offset="1" stop-color="#b8ecff"/>
+      </linearGradient>
+      <!-- grass gradient -->
+      <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8ed94b"/>
+        <stop offset="1" stop-color="#5fb52e"/>
+      </linearGradient>
+      <!-- ground plane: hazy/light near the far horizon, rich green up close -->
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c2ec96"/>
+        <stop offset="0.35" stop-color="#88d352"/>
+        <stop offset="1" stop-color="#43a024"/>
+      </linearGradient>
+      <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stop-color="#fff3a8"/>
+        <stop offset="1" stop-color="#ffd23e"/>
+      </radialGradient>
+      <!-- skin shading -->
+      <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe2cf"/>
+        <stop offset="1" stop-color="#ffcdb0"/>
+      </linearGradient>
+      <linearGradient id="skinLeg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffd9c2"/>
+        <stop offset="1" stop-color="#ffe2cf"/>
+      </linearGradient>
+      <!-- depth-of-field blurs -->
+      <filter id="dofBack" x="-10%" y="-10%" width="120%" height="120%">
+        <feGaussianBlur stdDeviation="7"/>
+      </filter>
+      <filter id="dofFront" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="2.4"/>
+      </filter>
+      <filter id="softShadow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="11"/>
+      </filter>
+    </defs>
+
+    <!-- ===== FAR BACKGROUND (blurred): thin sky strip, sun, clouds ===== -->
+    <g filter="url(#dofBack)">
+      <!-- sky strip -->
+      <rect x="-80" y="-80" width="1160" height="240" fill="url(#sky)"/>
+
+      <!-- small, distant smiling sun -->
+      <g transform="translate(158,78) scale(0.55)">
+        <circle cx="0" cy="0" r="60" fill="url(#sun)" stroke="#f0a500" stroke-width="4"/>
+        <g stroke="#ffce3a" stroke-width="8" stroke-linecap="round">
+          <line x1="0" y1="-100" x2="0" y2="-116"/>
+          <line x1="-100" y1="0" x2="-116" y2="0"/>
+          <line x1="100" y1="0" x2="116" y2="0"/>
+          <line x1="-71" y1="-71" x2="-82" y2="-82"/>
+          <line x1="71" y1="-71" x2="82" y2="-82"/>
+        </g>
+        <circle cx="-18" cy="-10" r="7" fill="#7a4a2b"/>
+        <circle cx="20" cy="-10" r="7" fill="#7a4a2b"/>
+        <circle cx="0" cy="6" r="10" fill="#ff9bb0" opacity="0.7"/>
+        <path d="M-22 16 Q0 40 22 16" fill="none" stroke="#7a4a2b" stroke-width="5" stroke-linecap="round"/>
+      </g>
+
+      <!-- distant puffy clouds -->
+      <g fill="#ffffff" stroke="#dff3ff" stroke-width="3">
+        <g class="cloud-drift">
+          <g transform="translate(740,46) scale(0.7)">
+            <ellipse cx="0" cy="0" rx="46" ry="34"/>
+            <ellipse cx="48" cy="8" rx="40" ry="30"/>
+            <ellipse cx="-44" cy="10" rx="36" ry="26"/>
+            <ellipse cx="6" cy="-22" rx="34" ry="26"/>
+          </g>
+        </g>
+        <g class="cloud-drift slow">
+          <g transform="translate(470,40) scale(0.5)">
+            <ellipse cx="0" cy="0" rx="46" ry="34"/>
+            <ellipse cx="48" cy="8" rx="40" ry="30"/>
+            <ellipse cx="-44" cy="10" rx="36" ry="26"/>
+          </g>
+        </g>
+      </g>
+      <!-- soft far hill meeting the horizon -->
+      <path d="M-80 132 Q300 86 520 120 Q780 156 1080 110 L1080 220 L-80 220 Z"
+            fill="#9ee05a"/>
+    </g><!-- /far background -->
+
+    <!-- ===== NEAR GROUND (in focus): high horizon, angled-down lawn ===== -->
+    <path d="M-80 110 Q300 80 520 112 Q780 146 1080 104 L1080 780 L-80 780 Z"
+          fill="url(#ground)" stroke="#6cbf38" stroke-width="3"/>
+    <!-- little flowers on the grass -->
+    <g class="flowers"></g>
+
+    <!-- ====================== FEET ====================== -->
+    <!-- soft contact shadows on the grass (grounding + depth) -->
+    <g filter="url(#softShadow)" fill="rgba(70,45,20,0.28)" stroke="none">
+      <ellipse cx="350" cy="632" rx="178" ry="46"/>
+      <ellipse cx="650" cy="632" rx="178" ry="46"/>
+    </g>
+
+    <!-- LEFT FOOT (large; toes up, big toe high toward center — in focus) -->
+    <g transform="translate(344,402) rotate(6) scale(1.16,1.32)"
+       stroke="#c77f4d" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M108 -118 C124 -36 118 66 60 136 C28 176 -30 176 -64 136
+               C-114 66 -118 -36 -104 -130 C-98 -158 -64 -182 -16 -186 C42 -190 94 -156 108 -118 Z" fill="#ffd0ab"/>
+      <ellipse cx="-18" cy="24" rx="34" ry="70" fill="#ffe1cb" opacity="0.55" stroke="none"/>
+      <g class="toe-glow">
+        <g class="toe" data-word="0">
+          <ellipse cx="72" cy="-150" rx="40" ry="46" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="72" cy="-166" rx="20" ry="17" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="1">
+          <ellipse cx="28" cy="-188" rx="31" ry="37" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="28" cy="-202" rx="15" ry="13" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="2">
+          <ellipse cx="-16" cy="-194" rx="27" ry="32" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="-16" cy="-207" rx="13" ry="12" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="3">
+          <ellipse cx="-56" cy="-180" rx="23" ry="28" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="-56" cy="-193" rx="11" ry="10" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="4">
+          <ellipse cx="-90" cy="-150" rx="19" ry="24" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="-90" cy="-163" rx="9" ry="8" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- RIGHT FOOT (mirror) -->
+    <g transform="translate(656,402) scale(-1.16,1.32) rotate(6)"
+       stroke="#c77f4d" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M108 -118 C124 -36 118 66 60 136 C28 176 -30 176 -64 136
+               C-114 66 -118 -36 -104 -130 C-98 -158 -64 -182 -16 -186 C42 -190 94 -156 108 -118 Z" fill="#ffd0ab"/>
+      <ellipse cx="-18" cy="24" rx="34" ry="70" fill="#ffe1cb" opacity="0.55" stroke="none"/>
+      <g class="toe-glow">
+        <g class="toe" data-word="5">
+          <ellipse cx="72" cy="-150" rx="40" ry="46" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="72" cy="-166" rx="20" ry="17" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="6">
+          <ellipse cx="28" cy="-188" rx="31" ry="37" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="28" cy="-202" rx="15" ry="13" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="7">
+          <ellipse cx="-16" cy="-194" rx="27" ry="32" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="-16" cy="-207" rx="13" ry="12" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="8">
+          <ellipse cx="-56" cy="-180" rx="23" ry="28" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="-56" cy="-193" rx="11" ry="10" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+        <g class="toe" data-word="9">
+          <ellipse cx="-90" cy="-150" rx="19" ry="24" fill="#ffd0ab" stroke="#c77f4d" stroke-width="5"/>
+          <ellipse class="toenail" cx="-90" cy="-163" rx="9" ry="8" fill="#ffe8db" stroke="#e7bfa6" stroke-width="2"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- LEGS / SHINS in FRONT: nearest the camera, attaching over the (now spread) ankles -->
+    <g stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="#ffd0ab">
+      <path d="M283 705 L303 542 Q338 518 373 542 L393 705 Z"/>
+      <path d="M717 705 L697 542 Q662 518 627 542 L607 705 Z"/>
+      <!-- soft ankle crease where shin meets the centre of the foot -->
+      <path d="M303 546 Q338 523 373 546" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+      <path d="M697 546 Q662 523 627 546" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+    </g>
+
+  </svg>
+</div>
+
+<div class="instructions">✨ Tap the magic wand on each toenail ✨</div>
+
+<!-- Magic wand cursor: golden stick with a tiny gift box on the tip -->
+<svg id="wand" viewBox="0 0 110 110">
+  <defs>
+    <linearGradient id="stick" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8c46a"/>
+      <stop offset="1" stop-color="#a9772f"/>
+    </linearGradient>
+  </defs>
+  <!-- stick angling down-right away from the tip -->
+  <line x1="40" y1="42" x2="92" y2="98" stroke="#8a5d22" stroke-width="13" stroke-linecap="round"/>
+  <line x1="40" y1="42" x2="92" y2="98" stroke="url(#stick)" stroke-width="8" stroke-linecap="round"/>
+  <!-- little magic sparkles around the topper -->
+  <g fill="#fff3a8" stroke="#ffd23e" stroke-width="1">
+    <path d="M66 16 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z"/>
+    <path d="M18 52 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 z"/>
+  </g>
+  <!-- gift box as the topper, centered on the tip (40,40) -->
+  <g transform="translate(40,40)">
+    <rect x="-17" y="-13" width="34" height="30" rx="5" fill="#ff5fa2" stroke="#c2336f" stroke-width="2.5"/>
+    <rect x="-17" y="-2" width="34" height="7" fill="#ffd166" stroke="#e6ad28" stroke-width="1"/>
+    <rect x="-3.5" y="-13" width="7" height="30" fill="#ffd166" stroke="#e6ad28" stroke-width="1"/>
+    <circle cx="-6" cy="-15" r="6" fill="#ffd166" stroke="#e6ad28" stroke-width="1.5"/>
+    <circle cx="6" cy="-15" r="6" fill="#ffd166" stroke="#e6ad28" stroke-width="1.5"/>
+    <circle cx="0" cy="-14" r="3.5" fill="#ff5fa2" stroke="#c2336f" stroke-width="1"/>
+  </g>
+</svg>
+
+<div id="finale">
+  <h1>Happy Mother's Day, Mama! 🌷</h1>
+  <div class="pedi">Because your feet do so much for everyone, you've earned a <b>relaxing pedicure</b>, on us. 💅<br>Pick a day and it's yours!<br><span style="font-size:0.78em;color:#b46;">Love, Jordan &amp; Jenna ❤️</span></div>
+  <div class="hint">(click anywhere to play again)</div>
+</div>
+
+<!-- digital countdown -->
+<div id="timer" class="hidden">⏱ 0:25</div>
+
+<!-- time's up overlay -->
+<div id="timesup">
+  <h1>⏰ Time's Up!</h1>
+  <p>So close! Give it another go 💅</p>
+  <button class="start-btn" id="retryBtn" style="margin-top:22px;">Try Again</button>
+</div>
+
+<!-- MANI-MAGIC title screen -->
+<div id="titleScreen">
+  <div class="title-card">
+    <span class="deco" style="top:8px; left:14px;">🌸</span>
+    <span class="deco" style="top:18px; right:18px; animation-delay:.6s;">🌷</span>
+    <span class="deco" style="bottom:14px; left:24px; animation-delay:1.1s;">🌼</span>
+    <span class="deco" style="bottom:20px; right:22px; animation-delay:.3s;">💖</span>
+    <div class="mani-sub">✨ welcome to ✨</div>
+    <div class="mani-title">Mani<br>Magic</div>
+    <div class="mani-flowers">🌸 💅 🌷 💖 🌼</div>
+    <div class="mani-rules">Grab the magic wand and paint all ten toes before the timer runs out!</div>
+    <button class="start-btn" id="startBtn">START ▶</button>
+  </div>
+</div>
+
+<script>
+  const colors = ['#ff4d8d','#ff7eb6','#ff5fa2','#c44fff','#7a6bff',
+                  '#ff4d8d','#ff7eb6','#ff5fa2','#c44fff','#7a6bff'];
+
+  const wand = document.getElementById('wand');
+  const finale = document.getElementById('finale');
+  const toes = Array.from(document.querySelectorAll('.toe'));
+  let painted = new Set();
+
+  window.addEventListener('mousemove', e => {
+    wand.style.left = e.clientX + 'px';
+    wand.style.top  = e.clientY + 'px';
+  });
+
+  function sparkle(x, y) {
+    const emojis = ['✨','⭐','💫','🌟','💖'];
+    for (let i = 0; i < 4; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      s.style.left = x + 'px';
+      s.style.top = y + 'px';
+      s.style.setProperty('--dx', (Math.random()*140-70)+'px');
+      s.style.setProperty('--dy', (Math.random()*-130-20)+'px');
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 800);
+    }
+  }
+
+  function popCount(x, y, n) {
+    const el = document.createElement('div');
+    el.className = 'count-pop';
+    el.textContent = n;
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 950);
+  }
+
+  function paintToe(toe) {
+    if (!gameStarted) return;
+    const idx = +toe.dataset.word;
+    if (painted.has(idx)) return;
+    painted.add(idx);
+
+    const nail = toe.querySelector('.toenail');
+    nail.setAttribute('fill', colors[idx]);
+
+    const group = toe.parentNode; // .toe-glow
+    group.style.filter = 'drop-shadow(0 0 10px ' + colors[idx] + ')';
+    setTimeout(()=> group.style.filter = '', 420);
+
+    const r = nail.getBoundingClientRect();
+    sparkle(r.left + r.width/2, r.top + r.height/2);
+    popCount(r.left + r.width/2, r.top + r.height/2, painted.size);
+
+    wand.classList.add('zap');
+    setTimeout(()=> wand.classList.remove('zap'), 120);
+
+    if (painted.size === toes.length) { stopTimer(); setTimeout(win, 700); }
+  }
+
+  // paint only when the nail itself is clicked / tapped
+  toes.forEach(toe => {
+    const nail = toe.querySelector('.toenail');
+    nail.style.cursor = 'none';
+    nail.addEventListener('click', () => paintToe(toe));
+    nail.addEventListener('touchstart', (e) => { e.preventDefault(); paintToe(toe); }, {passive:false});
+  });
+
+  // ===== game flow: title screen, countdown, win / lose, reset =====
+  const TIME = 25;
+  let gameStarted = false, timeLeft = TIME, timerId = null;
+  const timerEl   = document.getElementById('timer');
+  const timesup   = document.getElementById('timesup');
+  const titleScreen = document.getElementById('titleScreen');
+
+  function setOverlay(on){ document.body.classList.toggle('overlay-active', on); }
+
+  function renderTime(){
+    const s = Math.max(timeLeft, 0);
+    timerEl.textContent = '⏱ 0:' + String(s).padStart(2,'0');
+    timerEl.classList.toggle('low', s <= 8);
+  }
+  function startTimer(){
+    timeLeft = TIME; renderTime();
+    clearInterval(timerId);
+    timerId = setInterval(tick, 1000);
+    timerEl.classList.remove('hidden');
+  }
+  function stopTimer(){ clearInterval(timerId); }
+  function tick(){
+    timeLeft--; renderTime();
+    if (timeLeft <= 0){ stopTimer(); loseRound(); }
+  }
+
+  function resetRound(){
+    painted.clear();
+    toes.forEach(t => t.querySelector('.toenail').setAttribute('fill', '#ffe8db'));
+    finale.classList.remove('show'); finale.style.pointerEvents = 'none';
+    timesup.classList.remove('show');
+  }
+
+  function showTitle(){
+    gameStarted = false; stopTimer();
+    resetRound();
+    timerEl.classList.add('hidden');
+    document.body.classList.add('title-up'); setOverlay(true);
+    void titleScreen.offsetWidth;            // flush layout so it slides in
+    titleScreen.classList.add('shown');
+  }
+
+  function startGame(){
+    titleScreen.classList.remove('shown');
+    document.body.classList.remove('title-up'); setOverlay(false);
+    resetRound();
+    gameStarted = true;
+    startTimer();
+  }
+
+  function win(){
+    gameStarted = false;
+    timerEl.classList.add('hidden');
+    setOverlay(true);
+    finale.classList.add('show'); finale.style.pointerEvents = 'auto';
+    confettiBurst();
+  }
+
+  function loseRound(){
+    gameStarted = false;
+    timerEl.classList.add('hidden');
+    setOverlay(true);
+    timesup.classList.add('show');
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+  finale.addEventListener('click', showTitle);
+
+  // start on the title screen
+  showTitle();
+
+  function confettiBurst() {
+    const cols = ['#ff4d8d','#ffd166','#7a6bff','#5fd0ff','#ff7eb6','#9fff6b'];
+    for (let i=0;i<90;i++){
+      const c = document.createElement('div');
+      c.style.position='fixed';
+      c.style.width = c.style.height = (6+Math.random()*8)+'px';
+      c.style.background = cols[Math.floor(Math.random()*cols.length)];
+      c.style.left = (50 + (Math.random()*44-22))+'vw';
+      c.style.top = '-20px';
+      c.style.zIndex = 600;
+      c.style.borderRadius = Math.random()>.5 ? '50%' : '2px';
+      c.style.pointerEvents='none';
+      document.body.appendChild(c);
+      const dur = 2000+Math.random()*2200;
+      const dx = (Math.random()*420-210);
+      c.animate([
+        {transform:'translate(0,0) rotate(0deg)', opacity:1},
+        {transform:`translate(${dx}px, ${window.innerHeight+60}px) rotate(${Math.random()*720}deg)`, opacity:1}
+      ], {duration:dur, easing:'cubic-bezier(.3,.6,.7,1)'});
+      setTimeout(()=>c.remove(), dur);
+    }
+  }
+
+  // flowers (small near the far horizon, bigger up close) + foreground grass blades
+  (function ground(){
+    const g = document.querySelector('.flowers');
+    const svgns = 'http://www.w3.org/2000/svg';
+    const depth = cy => 0.45 + (Math.min(Math.max(cy,110),710)-110)/600 * 1.25;
+    const spots = [[60,170],[210,150],[505,138],[815,158],[945,182],
+                   [120,300],[905,315],[40,455],[975,470],
+                   [70,615],[250,690],[150,660],[770,690],[905,655],[985,705]];
+    const petalCols = ['#ff7eb6','#ffd166','#ff5fa2','#ffffff','#c44fff'];
+    spots.forEach((s,i)=>{
+      const cx=s[0], cy=s[1], sc=depth(cy), col=petalCols[i%petalCols.length];
+      const off=8*sc;
+      for(let p=0;p<5;p++){
+        const a=(p/5)*Math.PI*2;
+        const e=document.createElementNS(svgns,'circle');
+        e.setAttribute('cx', cx+Math.cos(a)*off);
+        e.setAttribute('cy', cy+Math.sin(a)*off);
+        e.setAttribute('r', 6*sc);
+        e.setAttribute('fill', col);
+        e.setAttribute('stroke','#e08bb5'); e.setAttribute('stroke-width', 1*sc);
+        g.appendChild(e);
+      }
+      const ctr=document.createElementNS(svgns,'circle');
+      ctr.setAttribute('cx',cx); ctr.setAttribute('cy',cy); ctr.setAttribute('r',5*sc);
+      ctr.setAttribute('fill','#ffd23e'); ctr.setAttribute('stroke','#e6ad28'); ctr.setAttribute('stroke-width',1*sc);
+      g.appendChild(ctr);
+    });
+    // foreground grass blades poking up from the very bottom (near = tall, sharp)
+    const greens=['#3f9a22','#4ea526','#5cb82e','#46a024'];
+    for(let x=-10;x<=1010;x+=20){
+      const h=28+Math.random()*48, lean=(Math.random()*26-13), b=710;
+      const p=document.createElementNS(svgns,'path');
+      p.setAttribute('d',`M${x} ${b} Q${x+lean*0.5} ${b-h*0.6} ${x+lean} ${b-h} Q${x+lean*0.5+5} ${b-h*0.6} ${x+7} ${b} Z`);
+      p.setAttribute('fill', greens[Math.floor(Math.random()*greens.length)]);
+      g.appendChild(p);
+    }
+  })();
+
+  // glossy highlight on each toenail (stays white when the polish is painted)
+  (function nailGloss(){
+    const svgns='http://www.w3.org/2000/svg';
+    document.querySelectorAll('.toe').forEach(t=>{
+      const n=t.querySelector('.toenail');
+      const cx=+n.getAttribute('cx'), cy=+n.getAttribute('cy'),
+            rx=+n.getAttribute('rx'), ry=+n.getAttribute('ry');
+      const h=document.createElementNS(svgns,'ellipse');
+      h.setAttribute('cx', cx-rx*0.3); h.setAttribute('cy', cy-ry*0.42);
+      h.setAttribute('rx', rx*0.34); h.setAttribute('ry', ry*0.3);
+      h.setAttribute('fill','#ffffff'); h.setAttribute('opacity','0.7');
+      h.setAttribute('stroke','none'); h.setAttribute('pointer-events','none');
+      t.appendChild(h);
+    });
+  })();
+
+</script>
+</body>
+</html>

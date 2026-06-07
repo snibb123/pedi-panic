@@ -440,11 +440,11 @@
 
     <!-- LEGS / SHINS in FRONT: nearest the camera, attaching over the (now spread) ankles -->
     <g stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="#ffd0ab">
-      <path d="M283 845 L303 662 Q338 638 373 662 L393 845 Z"/>
-      <path d="M717 845 L697 662 Q662 638 627 662 L607 845 Z"/>
+      <path d="M283 905 L303 722 Q338 698 373 722 L393 905 Z"/>
+      <path d="M717 905 L697 722 Q662 698 627 722 L607 905 Z"/>
       <!-- soft ankle crease where shin meets the centre of the foot -->
-      <path d="M303 666 Q338 643 373 666" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
-      <path d="M697 666 Q662 643 627 666" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+      <path d="M303 726 Q338 703 373 726" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+      <path d="M697 726 Q662 703 627 726" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
     </g>
 
   </svg>
@@ -696,10 +696,9 @@
   }
   function washToe(toe){
     const idx = +toe.dataset.word;
-    if (fill[idx] <= 0) return;             // bare toe → just a harmless splash
-    fill[idx] = 0;                          // wash the polish (partial or full) right off
+    if (fill[idx] <= 0 || fill[idx] >= 1) return;   // bare, or finished & "dry" → just a splash
+    fill[idx] = 0;                                   // wash off only half-done polish
     renderFill(idx);
-    painted.delete(idx);
   }
   function startWater(){
     stopWater();

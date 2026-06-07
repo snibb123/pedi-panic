@@ -622,12 +622,16 @@
     el.style.left = p.x + 'px';
     el.style.top  = '-20px';
     document.body.appendChild(el);
-    drops.push({ el, x: p.x, y: -20, vy: 3.2 + Math.random()*1.7, toe, targetY: p.y });
+    const prog = waterProgress();                       // 0 at start → 1 as time runs out
+    drops.push({ el, x: p.x, y: -20, vy: 3.0 + prog*2.8 + Math.random()*1.5, toe, targetY: p.y });
   }
+  function waterProgress(){ return Math.min(1, Math.max(0, (TIME - timeLeft) / TIME)); }
   function scheduleDrop(){
     if (!gameStarted) return;
     spawnDrop();
-    dropTimer = setTimeout(scheduleDrop, 950 + Math.random()*1200);   // staggered
+    const prog = waterProgress();
+    const base = 1500 + (380 - 1500) * prog;           // interval shrinks as the clock runs down
+    dropTimer = setTimeout(scheduleDrop, base + Math.random()*base*0.6);   // staggered, faster over time
   }
   function waterTick(){
     if (!gameStarted){ waterRAF = null; return; }

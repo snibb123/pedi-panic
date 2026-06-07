@@ -65,11 +65,12 @@
     height: 104px;
     pointer-events: none;
     z-index: 999;
-    transform: translate(-38px, -38px);
+    transform: translate(-28px, -80px);
     transition: transform .08s ease-out;
     filter: drop-shadow(0 4px 3px rgba(0,0,0,0.25));
   }
-  #wand.zap { transform: translate(-38px, -38px) scale(1.18); }
+  .polish { transition: opacity .1s linear; }
+  #wand.zap { transform: translate(-28px, -80px) scale(1.12); }
 
   #finale {
     position: fixed;
@@ -449,33 +450,34 @@
   </svg>
 </div>
 
-<div class="instructions">✨ Tap the magic wand on each toenail ✨</div>
+<div class="instructions">✨ Brush back &amp; forth to fill in each toenail ✨</div>
 
-<!-- Magic wand cursor: golden stick with a tiny gift box on the tip -->
+<!-- Nail-polish brush cursor: the bristle tip (lower-left, ~30,84) sits at the pointer -->
 <svg id="wand" viewBox="0 0 110 110">
   <defs>
-    <linearGradient id="stick" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#e8c46a"/>
-      <stop offset="1" stop-color="#a9772f"/>
+    <linearGradient id="capg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9ad4"/>
+      <stop offset="1" stop-color="#ff4fa6"/>
     </linearGradient>
   </defs>
-  <!-- stick angling down-right away from the tip -->
-  <line x1="40" y1="42" x2="92" y2="98" stroke="#8a5d22" stroke-width="13" stroke-linecap="round"/>
-  <line x1="40" y1="42" x2="92" y2="98" stroke="url(#stick)" stroke-width="8" stroke-linecap="round"/>
-  <!-- little magic sparkles around the topper -->
-  <g fill="#fff3a8" stroke="#ffd23e" stroke-width="1">
-    <path d="M66 16 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z"/>
-    <path d="M18 52 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 z"/>
+  <!-- handle / bottle cap -->
+  <line x1="46" y1="56" x2="84" y2="20" stroke="#c2336f" stroke-width="18" stroke-linecap="round"/>
+  <line x1="46" y1="56" x2="84" y2="20" stroke="url(#capg)" stroke-width="12" stroke-linecap="round"/>
+  <!-- cap ridges -->
+  <g stroke="#d6457f" stroke-width="1.5" opacity="0.55">
+    <line x1="72" y1="24" x2="80" y2="32"/>
+    <line x1="66" y1="30" x2="74" y2="38"/>
   </g>
-  <!-- gift box as the topper, centered on the tip (40,40) -->
-  <g transform="translate(40,40)">
-    <rect x="-17" y="-13" width="34" height="30" rx="5" fill="#ff5fa2" stroke="#c2336f" stroke-width="2.5"/>
-    <rect x="-17" y="-2" width="34" height="7" fill="#ffd166" stroke="#e6ad28" stroke-width="1"/>
-    <rect x="-3.5" y="-13" width="7" height="30" fill="#ffd166" stroke="#e6ad28" stroke-width="1"/>
-    <circle cx="-6" cy="-15" r="6" fill="#ffd166" stroke="#e6ad28" stroke-width="1.5"/>
-    <circle cx="6" cy="-15" r="6" fill="#ffd166" stroke="#e6ad28" stroke-width="1.5"/>
-    <circle cx="0" cy="-14" r="3.5" fill="#ff5fa2" stroke="#c2336f" stroke-width="1"/>
-  </g>
+  <!-- silver ferrule -->
+  <line x1="40" y1="62" x2="50" y2="52" stroke="#aeb6bd" stroke-width="10" stroke-linecap="round"/>
+  <line x1="40" y1="62" x2="50" y2="52" stroke="#e8edf0" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- brush bristles (polish-loaded), pointed tip at ~(30,84) -->
+  <path d="M46 56 C 54 62, 45 77, 31 85 C 23 78, 30 61, 46 56 Z"
+        fill="#ff5fa2" stroke="#c2336f" stroke-width="2" stroke-linejoin="round"/>
+  <!-- wet-polish highlight -->
+  <path d="M41 60 C 45 64, 40 73, 33 80" fill="none" stroke="#ffd0e8" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+  <!-- glossy drip at the very tip -->
+  <circle cx="30" cy="86" r="3" fill="#ff5fa2" stroke="#c2336f" stroke-width="1"/>
 </svg>
 
 <div id="finale">
@@ -485,7 +487,7 @@
 </div>
 
 <!-- digital countdown -->
-<div id="timer" class="hidden">⏱ 0:25</div>
+<div id="timer" class="hidden">⏱ 0:35</div>
 
 <!-- time's up overlay -->
 <div id="timesup">
@@ -504,7 +506,7 @@
     <div class="mani-sub">✨ welcome to ✨</div>
     <div class="mani-title">Pedi<br>Panic</div>
     <div class="mani-flowers">🌸 💅 🌷 💖 🌼</div>
-    <div class="mani-rules">Grab the magic wand and paint all ten toes before the timer runs out — but watch out for splashes that wash the polish off! 💦</div>
+    <div class="mani-rules">Grab the polish brush and fill in all ten toenails before the timer runs out — but watch out for splashes that wash the polish off! 💦</div>
     <button class="start-btn" id="startBtn">START ▶</button>
   </div>
 </div>
@@ -516,12 +518,75 @@
   const wand = document.getElementById('wand');
   const finale = document.getElementById('finale');
   const toes = Array.from(document.querySelectorAll('.toe'));
-  let painted = new Set();
+  let painted = new Set();                 // toes that are fully filled in
 
-  window.addEventListener('mousemove', e => {
-    wand.style.left = e.clientX + 'px';
-    wand.style.top  = e.clientY + 'px';
+  // ----- progressive fill: a polish overlay per toenail (0 = bare, 1 = full) -----
+  const fill = new Array(toes.length).fill(0);
+  const polishEls = [];
+  let nailRects = [];                       // cached screen rects for hit-testing
+  const FILL_STEP = 0.06;                   // added per brush move over a nail
+
+  toes.forEach((toe, idx) => {
+    const nail = toe.querySelector('.toenail');
+    const p = nail.cloneNode(false);
+    p.removeAttribute('class');
+    p.classList.add('polish');
+    p.setAttribute('fill', colors[idx]);
+    p.setAttribute('stroke', 'none');
+    p.style.opacity = 0;
+    p.style.pointerEvents = 'none';
+    nail.after(p);
+    polishEls[idx] = p;
   });
+
+  function cacheRects(){
+    nailRects = toes.map(t => t.querySelector('.toenail').getBoundingClientRect());
+  }
+  window.addEventListener('resize', () => { if (gameStarted) cacheRects(); });
+
+  function renderFill(i){
+    polishEls[i].style.opacity = fill[i] <= 0 ? 0 : (0.30 + 0.70 * fill[i]);
+  }
+  function brushAt(x, y){
+    if (!gameStarted) return;
+    for (let i = 0; i < toes.length; i++){
+      const r = nailRects[i];
+      if (!r) continue;
+      if (x >= r.left-5 && x <= r.right+5 && y >= r.top-5 && y <= r.bottom+5){
+        if (fill[i] >= 1) return;
+        fill[i] = Math.min(1, fill[i] + FILL_STEP);
+        renderFill(i);
+        wand.classList.add('zap');
+        clearTimeout(wand._zt); wand._zt = setTimeout(() => wand.classList.remove('zap'), 90);
+        if (fill[i] >= 1) completeToe(i);
+        return;                              // one nail per move
+      }
+    }
+  }
+  function completeToe(i){
+    if (painted.has(i)) return;
+    painted.add(i);
+    const r = nailRects[i] || toes[i].querySelector('.toenail').getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    sparkle(cx, cy);
+    popCount(cx, cy, painted.size);
+    const group = toes[i].parentNode;        // .toe-glow
+    group.style.filter = 'drop-shadow(0 0 10px ' + colors[i] + ')';
+    setTimeout(() => group.style.filter = '', 420);
+    if (painted.size === toes.length){ gameStarted = false; stopTimer(); stopWater(); setTimeout(win, 700); }
+  }
+
+  function moveBrush(x, y){
+    wand.style.left = x + 'px';
+    wand.style.top  = y + 'px';
+    brushAt(x, y);
+  }
+  window.addEventListener('mousemove', e => moveBrush(e.clientX, e.clientY));
+  window.addEventListener('touchmove', e => {
+    const t = e.touches[0]; if (!t) return;
+    moveBrush(t.clientX, t.clientY);
+    if (gameStarted) e.preventDefault();
+  }, {passive:false});
 
   function sparkle(x, y) {
     const emojis = ['✨','⭐','💫','🌟','💖'];
@@ -548,39 +613,8 @@
     setTimeout(() => el.remove(), 950);
   }
 
-  function paintToe(toe) {
-    if (!gameStarted) return;
-    const idx = +toe.dataset.word;
-    if (painted.has(idx)) return;
-    painted.add(idx);
-
-    const nail = toe.querySelector('.toenail');
-    nail.setAttribute('fill', colors[idx]);
-
-    const group = toe.parentNode; // .toe-glow
-    group.style.filter = 'drop-shadow(0 0 10px ' + colors[idx] + ')';
-    setTimeout(()=> group.style.filter = '', 420);
-
-    const r = nail.getBoundingClientRect();
-    sparkle(r.left + r.width/2, r.top + r.height/2);
-    popCount(r.left + r.width/2, r.top + r.height/2, painted.size);
-
-    wand.classList.add('zap');
-    setTimeout(()=> wand.classList.remove('zap'), 120);
-
-    if (painted.size === toes.length) { gameStarted = false; stopTimer(); stopWater(); setTimeout(win, 700); }
-  }
-
-  // paint only when the nail itself is clicked / tapped
-  toes.forEach(toe => {
-    const nail = toe.querySelector('.toenail');
-    nail.style.cursor = 'none';
-    nail.addEventListener('click', () => paintToe(toe));
-    nail.addEventListener('touchstart', (e) => { e.preventDefault(); paintToe(toe); }, {passive:false});
-  });
-
   // ===== game flow: title screen, countdown, win / lose, reset =====
-  const TIME = 25;
+  const TIME = 35;
   let gameStarted = false, timeLeft = TIME, timerId = null;
   const timerEl   = document.getElementById('timer');
   const timesup   = document.getElementById('timesup');
@@ -662,9 +696,10 @@
   }
   function washToe(toe){
     const idx = +toe.dataset.word;
-    if (!painted.has(idx)) return;          // unpainted toe → just a harmless splash
+    if (fill[idx] <= 0) return;             // bare toe → just a harmless splash
+    fill[idx] = 0;                          // wash the polish (partial or full) right off
+    renderFill(idx);
     painted.delete(idx);
-    toe.querySelector('.toenail').setAttribute('fill', NAIL_BASE);
   }
   function startWater(){
     stopWater();
@@ -681,7 +716,7 @@
 
   function resetRound(){
     painted.clear();
-    toes.forEach(t => t.querySelector('.toenail').setAttribute('fill', '#ffe8db'));
+    for (let i = 0; i < fill.length; i++){ fill[i] = 0; renderFill(i); }
     finale.classList.remove('show'); finale.style.pointerEvents = 'none';
     timesup.classList.remove('show');
   }
@@ -699,6 +734,7 @@
     titleScreen.classList.remove('shown');
     document.body.classList.remove('title-up'); setOverlay(false);
     resetRound();
+    cacheRects();
     gameStarted = true;
     startTimer();
     startWater();

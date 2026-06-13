@@ -118,11 +118,15 @@
     top: 14px; left: 0; right: 0;
     text-align: center;
     color: #fff;
-    font-size: clamp(20px, 3.4vw, 32px);
-    font-weight: bold;
+    font-size: clamp(20px, 3.4vw, 34px);
+    font-weight: 800;
     z-index: 4;
     pointer-events: none;
-    text-shadow: 2px 2px 0 #c2418a, -2px -2px 0 #c2418a, 2px -2px 0 #c2418a, -2px 2px 0 #c2418a;
+    -webkit-text-stroke: 3px #c2418a;     /* crisp vector outline instead of layered shadows */
+    paint-order: stroke;                  /* stroke behind the white fill */
+    text-shadow: 0 3px 5px rgba(0,0,0,0.22);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   /* gentle cloud drift (CSS so the page can reach idle) */
@@ -514,7 +518,7 @@
 
 <div id="finale">
   <h1>Happy Mother's Day, Mama! 🌷</h1>
-  <div class="pedi">Because your feet do so much for everyone, you've earned a <b>relaxing pedicure</b>, on us. 💅<br>Everything you need is in your <b>pedicure gift bag</b> 🎁 — pick a day and it's yours!<br><span style="font-size:0.78em;color:#b46;">Love, Jordan &amp; Jenna ❤️</span></div>
+  <div class="pedi">Because your hands and feet do so much for everyone, you've earned a <b>manicure</b> <i>and</i> a <b>pedicure</b> — two separate treats, both on us! 💅<br>It's all in your gift bag 🎁 — pick your days and they're yours!<br><span style="font-size:0.78em;color:#b46;">Love, Jordan &amp; Jenna ❤️</span></div>
   <div class="hint">(click anywhere to play again)</div>
 </div>
 
@@ -705,7 +709,7 @@
     if (!gameStarted) return;
     spawnDrop();
     const prog = waterProgress();
-    const base = 1500 + (380 - 1500) * prog;           // interval shrinks as the clock runs down
+    const base = 2000 + (850 - 2000) * prog;           // interval shrinks as the clock runs down
     dropTimer = setTimeout(scheduleDrop, base + Math.random()*base*0.6);   // staggered, faster over time
   }
   function waterTick(){

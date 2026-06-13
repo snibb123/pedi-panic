@@ -272,6 +272,31 @@
   }
   #timesup p { color:#fff; font-size: clamp(15px,3vw,22px); margin-top:10px;
     text-shadow:1px 1px 0 #c2418a; }
+
+  /* ===== Card / Game mode toggle (bottom-right, iOS-style) ===== */
+  #modeToggle {
+    position: fixed; right: 16px; bottom: 16px; z-index: 805;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    user-select: none;
+  }
+  .mode-caption {
+    font-size: 14px; font-weight: bold; color: #fff;
+    background: rgba(201,46,142,0.82); padding: 3px 11px; border-radius: 11px;
+    text-shadow: 1px 1px 0 #a02468; white-space: nowrap;
+  }
+  .ios-switch {
+    width: 66px; height: 34px; border-radius: 17px; position: relative;
+    background: #9bb1bd; border: 2px solid #fff; cursor: pointer;
+    transition: background .25s; box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+  }
+  .ios-switch.on { background: #43c463; }      /* Game mode = green / on */
+  .ios-knob {
+    position: absolute; top: 3px; left: 3px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: left .25s;
+  }
+  .ios-switch.on .ios-knob { left: 35px; }
 </style>
 </head>
 <body>
@@ -453,6 +478,12 @@
 
 <div class="instructions">✨ Brush back &amp; forth to fully fill each toenail ✨</div>
 
+<!-- Card / Game mode toggle -->
+<div id="modeToggle" title="Game mode = splashes + timer. Card mode = relaxed, no splashes.">
+  <div class="mode-caption" id="modeCaption">Game mode</div>
+  <div class="ios-switch on" id="modeSwitch"><div class="ios-knob"></div></div>
+</div>
+
 <!-- Nail-polish brush cursor: the bristle tip (lower-left, ~30,84) sits at the pointer -->
 <svg id="wand" viewBox="0 0 110 110">
   <defs>
@@ -483,7 +514,7 @@
 
 <div id="finale">
   <h1>Happy Mother's Day, Mama! 🌷</h1>
-  <div class="pedi">Because your feet do so much for everyone, you've earned a <b>relaxing pedicure</b>, on us. 💅<br>Pick a day and it's yours!<br><span style="font-size:0.78em;color:#b46;">Love, Jordan &amp; Jenna ❤️</span></div>
+  <div class="pedi">Because your feet do so much for everyone, you've earned a <b>relaxing pedicure</b>, on us. 💅<br>Everything you need is in your <b>pedicure gift bag</b> 🎁 — pick a day and it's yours!<br><span style="font-size:0.78em;color:#b46;">Love, Jordan &amp; Jenna ❤️</span></div>
   <div class="hint">(click anywhere to play again)</div>
 </div>
 
@@ -620,6 +651,7 @@
   // ===== game flow: title screen, countdown, win / lose, reset =====
   const TIME = 35;
   let gameStarted = false, timeLeft = TIME, timerId = null;
+  let gameMode = true;                       // true = Game (timer + splashes), false = Card (relaxed)
   const timerEl   = document.getElementById('timer');
   const timesup   = document.getElementById('timesup');
   const titleScreen = document.getElementById('titleScreen');
@@ -740,8 +772,12 @@
     resetRound();
     cacheRects();
     gameStarted = true;
-    startTimer();
-    startWater();
+    if (gameMode){            // Game mode: timer + splashes
+      startTimer();
+      startWater();
+    } else {                  // Card mode: relaxed, no clock or splashes
+      timerEl.classList.add('hidden');
+    }
   }
 
   function win(){
@@ -762,6 +798,23 @@
   document.getElementById('startBtn').addEventListener('click', startGame);
   document.getElementById('retryBtn').addEventListener('click', startGame);
   finale.addEventListener('click', showTitle);
+
+  // ----- Card / Game mode toggle -----
+  const modeSwitch  = document.getElementById('modeSwitch');
+  const modeCaption = document.getElementById('modeCaption');
+  function updateModeUI(){
+    modeSwitch.classList.toggle('on', gameMode);
+    modeCaption.textContent = gameMode ? 'Game mode' : 'Card mode';
+  }
+  modeSwitch.addEventListener('click', () => {
+    gameMode = !gameMode;
+    updateModeUI();
+    if (gameStarted){                          // apply the change to the round in progress
+      if (gameMode){ startTimer(); startWater(); }
+      else { stopTimer(); stopWater(); timerEl.classList.add('hidden'); }
+    }
+  });
+  updateModeUI();
 
   // start on the title screen
   showTitle();

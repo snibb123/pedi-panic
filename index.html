@@ -400,13 +400,13 @@
     <!-- ====================== FEET ====================== -->
     <!-- soft contact shadows on the grass (grounding + depth) -->
     <g filter="url(#softShadow)" fill="rgba(70,45,20,0.28)" stroke="none">
-      <ellipse cx="350" cy="665" rx="178" ry="46"/>
-      <ellipse cx="650" cy="665" rx="178" ry="46"/>
+      <ellipse cx="405" cy="612" rx="150" ry="40"/>
+      <ellipse cx="595" cy="612" rx="150" ry="40"/>
     </g>
 
     <!-- LEFT FOOT (large; toes up, big toe high toward center — in focus) -->
-    <g transform="translate(344,435) rotate(6) scale(1.16,1.32)"
-       stroke="#c77f4d" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(403,422) rotate(6) scale(0.92,1.05)"
+       stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
       <path d="M108 -118 C124 -36 118 66 60 136 C28 176 -30 176 -64 136
                C-114 66 -118 -36 -104 -130 C-98 -158 -64 -182 -16 -186 C42 -190 94 -156 108 -118 Z" fill="#ffd0ab"/>
       <ellipse cx="-18" cy="24" rx="34" ry="70" fill="#ffe1cb" opacity="0.55" stroke="none"/>
@@ -435,8 +435,8 @@
     </g>
 
     <!-- RIGHT FOOT (mirror) -->
-    <g transform="translate(656,435) scale(-1.16,1.32) rotate(6)"
-       stroke="#c77f4d" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(597,422) scale(-0.92,1.05) rotate(6)"
+       stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
       <path d="M108 -118 C124 -36 118 66 60 136 C28 176 -30 176 -64 136
                C-114 66 -118 -36 -104 -130 C-98 -158 -64 -182 -16 -186 C42 -190 94 -156 108 -118 Z" fill="#ffd0ab"/>
       <ellipse cx="-18" cy="24" rx="34" ry="70" fill="#ffe1cb" opacity="0.55" stroke="none"/>
@@ -466,11 +466,11 @@
 
     <!-- LEGS / SHINS in FRONT: nearest the camera, attaching over the (now spread) ankles -->
     <g stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="#ffd0ab">
-      <path d="M283 738 L303 575 Q338 551 373 575 L393 738 Z"/>
-      <path d="M717 738 L697 575 Q662 551 627 575 L607 738 Z"/>
+      <path d="M347 720 L365 540 Q400 518 435 540 L453 720 Z"/>
+      <path d="M653 720 L635 540 Q600 518 565 540 L547 720 Z"/>
       <!-- soft ankle crease where shin meets the centre of the foot -->
-      <path d="M303 579 Q338 555 373 579" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
-      <path d="M697 579 Q662 555 627 579" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+      <path d="M365 544 Q400 522 435 544" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+      <path d="M635 544 Q600 522 565 544" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
     </g>
 
   </svg>
@@ -583,19 +583,24 @@
   }
   function brushAt(x, y){
     if (!gameStarted) return;
+    // pick the CLOSEST still-unfinished nail under the brush, so finished nails
+    // never block an overlapping neighbour (that bug capped the count at 8)
+    let best = -1, bestDist = Infinity;
     for (let i = 0; i < toes.length; i++){
       const r = nailRects[i];
-      if (!r) continue;
-      if (x >= r.left-5 && x <= r.right+5 && y >= r.top-5 && y <= r.bottom+5){
-        if (fill[i] >= 1) return;
-        fill[i] = Math.min(1, fill[i] + FILL_STEP);
-        renderFill(i);
-        wand.classList.add('zap');
-        clearTimeout(wand._zt); wand._zt = setTimeout(() => wand.classList.remove('zap'), 90);
-        if (fill[i] >= DONE) completeToe(i);
-        return;                              // one nail per move
+      if (!r || fill[i] >= 1) continue;
+      if (x >= r.left-6 && x <= r.right+6 && y >= r.top-6 && y <= r.bottom+6){
+        const ncx = (r.left + r.right)/2, ncy = (r.top + r.bottom)/2;
+        const d = (x-ncx)*(x-ncx) + (y-ncy)*(y-ncy);
+        if (d < bestDist){ bestDist = d; best = i; }
       }
     }
+    if (best < 0) return;
+    fill[best] = Math.min(1, fill[best] + FILL_STEP);
+    renderFill(best);
+    wand.classList.add('zap');
+    clearTimeout(wand._zt); wand._zt = setTimeout(() => wand.classList.remove('zap'), 90);
+    if (fill[best] >= DONE) completeToe(best);
   }
   function completeToe(i){
     if (painted.has(i)) return;

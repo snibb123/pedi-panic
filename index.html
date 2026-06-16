@@ -12,9 +12,7 @@
     overflow: hidden;
     font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
     cursor: none;
-    /* sky→grass gradient so the scene's letterbox areas blend at any screen shape */
-    background: linear-gradient(to bottom,
-      #79cdff 0%, #aee6ff 14%, #a7e072 16.5%, #88d352 32%, #46a026 100%);
+    background: #6ec6ff;
     user-select: none;
   }
 
@@ -310,7 +308,7 @@
 <div class="stage">
   <div class="title-wrap"></div>
 
-  <svg class="scene" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
+  <svg class="scene" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice">
     <defs>
       <!-- sky gradient -->
       <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
@@ -356,10 +354,10 @@
     <!-- ===== FAR BACKGROUND (blurred): thin sky strip, sun, clouds ===== -->
     <g filter="url(#dofBack)">
       <!-- sky strip -->
-      <rect x="-80" y="-80" width="1160" height="240" fill="url(#sky)"/>
+      <rect x="-200" y="-200" width="1400" height="450" fill="url(#sky)"/>
 
       <!-- small, distant smiling sun -->
-      <g transform="translate(158,78) scale(0.55)">
+      <g transform="translate(165,120) scale(0.6)">
         <circle cx="0" cy="0" r="60" fill="url(#sun)" stroke="#f0a500" stroke-width="4"/>
         <g stroke="#ffce3a" stroke-width="8" stroke-linecap="round">
           <line x1="0" y1="-100" x2="0" y2="-116"/>
@@ -377,7 +375,7 @@
       <!-- distant puffy clouds -->
       <g fill="#ffffff" stroke="#dff3ff" stroke-width="3">
         <g class="cloud-drift">
-          <g transform="translate(740,46) scale(0.7)">
+          <g transform="translate(745,95) scale(0.62)">
             <ellipse cx="0" cy="0" rx="46" ry="34"/>
             <ellipse cx="48" cy="8" rx="40" ry="30"/>
             <ellipse cx="-44" cy="10" rx="36" ry="26"/>
@@ -385,7 +383,7 @@
           </g>
         </g>
         <g class="cloud-drift slow">
-          <g transform="translate(470,40) scale(0.5)">
+          <g transform="translate(455,115) scale(0.46)">
             <ellipse cx="0" cy="0" rx="46" ry="34"/>
             <ellipse cx="48" cy="8" rx="40" ry="30"/>
             <ellipse cx="-44" cy="10" rx="36" ry="26"/>
@@ -393,12 +391,12 @@
         </g>
       </g>
       <!-- soft far hill meeting the horizon -->
-      <path d="M-80 132 Q300 86 520 120 Q780 156 1080 110 L1080 220 L-80 220 Z"
+      <path d="M-80 222 Q300 176 520 210 Q780 246 1080 200 L1080 340 L-80 340 Z"
             fill="#9ee05a"/>
     </g><!-- /far background -->
 
-    <!-- ===== NEAR GROUND (in focus): high horizon, angled-down lawn ===== -->
-    <path d="M-80 110 Q300 80 520 112 Q780 146 1080 104 L1080 780 L-80 780 Z"
+    <!-- ===== NEAR GROUND (in focus): horizon ~200, angled-down lawn ===== -->
+    <path d="M-80 200 Q300 170 520 202 Q780 236 1080 194 L1080 860 L-80 860 Z"
           fill="url(#ground)" stroke="#6cbf38" stroke-width="3"/>
     <!-- little flowers on the grass -->
     <g class="flowers"></g>
@@ -406,13 +404,13 @@
     <!-- ====================== FEET ====================== -->
     <!-- soft contact shadows on the grass (grounding + depth) -->
     <g filter="url(#softShadow)" fill="rgba(70,45,20,0.28)" stroke="none">
-      <ellipse cx="405" cy="612" rx="150" ry="40"/>
-      <ellipse cx="595" cy="612" rx="150" ry="40"/>
+      <ellipse cx="398" cy="620" rx="135" ry="36"/>
+      <ellipse cx="602" cy="620" rx="135" ry="36"/>
     </g>
 
     <!-- LEFT FOOT (large; toes up, big toe high toward center — in focus) -->
-    <g transform="translate(403,422) rotate(6) scale(0.92,1.05)"
-       stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(388,460) rotate(6) scale(0.82,0.92)"
+       stroke="#c77f4d" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round">
       <path d="M108 -118 C124 -36 118 66 60 136 C28 176 -30 176 -64 136
                C-114 66 -118 -36 -104 -130 C-98 -158 -64 -182 -16 -186 C42 -190 94 -156 108 -118 Z" fill="#ffd0ab"/>
       <ellipse cx="-18" cy="24" rx="34" ry="70" fill="#ffe1cb" opacity="0.55" stroke="none"/>
@@ -441,8 +439,8 @@
     </g>
 
     <!-- RIGHT FOOT (mirror) -->
-    <g transform="translate(597,422) scale(-0.92,1.05) rotate(6)"
-       stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(612,460) scale(-0.82,0.92) rotate(6)"
+       stroke="#c77f4d" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round">
       <path d="M108 -118 C124 -36 118 66 60 136 C28 176 -30 176 -64 136
                C-114 66 -118 -36 -104 -130 C-98 -158 -64 -182 -16 -186 C42 -190 94 -156 108 -118 Z" fill="#ffd0ab"/>
       <ellipse cx="-18" cy="24" rx="34" ry="70" fill="#ffe1cb" opacity="0.55" stroke="none"/>
@@ -472,11 +470,11 @@
 
     <!-- LEGS / SHINS in FRONT: nearest the camera, attaching over the (now spread) ankles -->
     <g stroke="#c77f4d" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="#ffd0ab">
-      <path d="M347 720 L365 540 Q400 518 435 540 L453 720 Z"/>
-      <path d="M653 720 L635 540 Q600 518 565 540 L547 720 Z"/>
+      <path d="M350 730 L368 560 Q400 538 432 560 L450 730 Z"/>
+      <path d="M650 730 L632 560 Q600 538 568 560 L550 730 Z"/>
       <!-- soft ankle crease where shin meets the centre of the foot -->
-      <path d="M365 544 Q400 522 435 544" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
-      <path d="M635 544 Q600 522 565 544" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+      <path d="M368 564 Q400 542 432 564" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
+      <path d="M632 564 Q600 542 568 564" fill="none" stroke="#e3a878" stroke-width="5" opacity="0.7"/>
     </g>
 
   </svg>
@@ -858,9 +856,9 @@
     const g = document.querySelector('.flowers');
     const svgns = 'http://www.w3.org/2000/svg';
     const depth = cy => 0.45 + (Math.min(Math.max(cy,110),710)-110)/600 * 1.25;
-    const spots = [[60,170],[210,150],[505,138],[815,158],[945,182],
-                   [120,300],[905,315],[40,455],[975,470],
-                   [70,615],[250,690],[150,660],[770,690],[905,655],[985,705]];
+    const spots = [[60,255],[210,238],[505,228],[815,246],[945,268],
+                   [120,370],[905,385],[40,500],[975,515],
+                   [70,635],[250,700],[150,668],[770,700],[905,660],[985,712]];
     const petalCols = ['#ff7eb6','#ffd166','#ff5fa2','#ffffff','#c44fff'];
     spots.forEach((s,i)=>{
       const cx=s[0], cy=s[1], sc=depth(cy), col=petalCols[i%petalCols.length];

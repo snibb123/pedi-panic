@@ -12,7 +12,9 @@
     overflow: hidden;
     font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
     cursor: none;
-    background: #6ec6ff;
+    /* sky→grass gradient so the scene's letterbox areas blend at any screen shape */
+    background: linear-gradient(to bottom,
+      #79cdff 0%, #aee6ff 14%, #a7e072 16.5%, #88d352 32%, #46a026 100%);
     user-select: none;
   }
 
@@ -308,7 +310,7 @@
 <div class="stage">
   <div class="title-wrap"></div>
 
-  <svg class="scene" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice">
+  <svg class="scene" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
     <defs>
       <!-- sky gradient -->
       <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">

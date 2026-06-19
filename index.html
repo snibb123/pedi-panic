@@ -129,13 +129,7 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* gentle cloud drift (CSS so the page can reach idle) */
-  .cloud-drift { animation: drift 9s ease-in-out infinite alternate; }
-  .cloud-drift.slow { animation-duration: 12s; }
-  @keyframes drift {
-    from { transform: translateX(-18px); }
-    to   { transform: translateX(18px); }
-  }
+  /* clouds are static — animating them re-runs the SVG blur every frame (very slow on mobile) */
 
   .sparkle {
     position: fixed;
@@ -167,11 +161,12 @@
 
   /* falling water drops (wash the polish off if you're too slow) */
   .water-drop {
-    position: fixed; z-index: 7; width: 18px; height: 24px;
+    position: fixed; top: 0; z-index: 7; width: 18px; height: 24px;
     margin-left: -9px; margin-top: -12px; pointer-events: none;
     background: radial-gradient(circle at 35% 28%, #d6f3ff, #69c3ff 62%, #2f9fe6);
     border-radius: 50% 50% 50% 50% / 66% 66% 34% 34%;
     box-shadow: 0 0 7px rgba(90,185,255,0.6);
+    will-change: transform;
   }
   .splash-bit {
     position: fixed; z-index: 7; width: 7px; height: 7px; border-radius: 50%;
@@ -185,6 +180,10 @@
 
   /* ===== blur the scene & swap cursor while an overlay is up ===== */
   body.title-up .stage { filter: blur(7px) brightness(0.95) saturate(1.1); }
+  /* a full-screen blur is too heavy on phones — just dim instead */
+  @media (pointer: coarse) {
+    body.title-up .stage { filter: brightness(0.9) saturate(1.1); }
+  }
   body.overlay-active { cursor: auto; }
   body.overlay-active #wand { display: none; }
 
@@ -352,7 +351,7 @@
     </defs>
 
     <!-- ===== FAR BACKGROUND (blurred): thin sky strip, sun, clouds ===== -->
-    <g filter="url(#dofBack)">
+    <g id="farScene" filter="url(#dofBack)">
       <!-- sky strip -->
       <rect x="-200" y="-200" width="1400" height="450" fill="url(#sky)"/>
 
@@ -699,7 +698,7 @@
     const el = document.createElement('div');
     el.className = 'water-drop';
     el.style.left = p.x + 'px';
-    el.style.top  = '-20px';
+    el.style.transform = 'translateY(-20px)';
     document.body.appendChild(el);
     const prog = waterProgress();                       // 0 at start → 1 as time runs out
     drops.push({ el, x: p.x, y: -20, vy: 3.0 + prog*2.8 + Math.random()*1.5, toe, targetY: p.y });
@@ -717,7 +716,7 @@
     for (let i = drops.length - 1; i >= 0; i--){
       const d = drops[i];
       d.y += d.vy;
-      d.el.style.top = d.y + 'px';
+      d.el.style.transform = 'translateY(' + d.y + 'px)';
       if (d.y >= d.targetY){
         splashWater(d.x, d.targetY);
         washToe(d.toe);
@@ -824,6 +823,12 @@
     }
   });
   updateModeUI();
+
+  // on phones, drop the expensive depth-of-field blur on the background (big perf win)
+  if (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 820){
+    const fs = document.getElementById('farScene');
+    if (fs) fs.removeAttribute('filter');
+  }
 
   // start on the title screen
   showTitle();
